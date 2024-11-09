@@ -11,3 +11,7 @@ type Usuario struct {
 type UsuarioResponse struct {
 	Usuarios []Usuario `json:"usuarios"`
 }
+type LoginRequest struct {
+	ID    uint64 `json:"id"`
+	Senha string `json:"senha"`
+}

@@ -41,6 +41,7 @@ func LoadRouter() *mux.Router {
 // Função que configura as rotas relacionadas ao usuário
 func loadRouterUsuario(router *mux.Router) {
 	// Rotas para o CRUD de usuário
+	router.HandleFunc("/login", handlers.LoginUsuario).Methods("POST")
 	router.HandleFunc("/usuario", handlers.CriarUsuario).Methods("POST")
 	router.HandleFunc("/usuarios/{id}", handlers.BuscarUsuarioPorID).Methods("GET")
 	router.HandleFunc("/usuarios/{id}", handlers.AtualizarUsuario).Methods("PUT")
