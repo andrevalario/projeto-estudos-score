@@ -1,8 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"log"
+
+	"github.com/andrevalario/projeto-estudos-score/router"
+)
+
+func startApp() {
+	router.InitializeRouter()
+}
 
 func main() {
-	fmt.Println("API TESTE as")
-	fmt.Println("API TESTE as")
+	startApp()
+	log.Println("Servidor iniciado na porta 8080")
 }
