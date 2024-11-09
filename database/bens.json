@@ -1,0 +1,21 @@
+[
+    {
+      "id": 1,
+      "nome": "Carro",
+      "valor": 50000.00,
+      "proprietarioId": 1
+    },
+    {
+      "id": 2,
+      "nome": "Casa",
+      "valor": 150000.00,
+      "proprietarioId": 2
+    },
+    {
+      "id": 3,
+      "nome": "Bicicleta",
+      "valor": 500.00,
+      "proprietarioId": 3
+    }
+  ]
+  
