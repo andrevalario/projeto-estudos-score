@@ -8,13 +8,9 @@ import (
 	mdldivida "github.com/andrevalario/projeto-estudos-score/model/divida"
 )
 
-func CriarDivida(ctx context.Context, divida domain.Divida) (validationErrors []domain.ApiError, err error) {
-	// Validação e regras de negócios para a dívida
-	if divida.Valor <= 0 {
-		validationErrors = append(validationErrors, domain.ApiError{
-			Detail: "O valor da dívida deve ser maior que zero.",
-			Status: http.StatusBadRequest,
-		})
+func CriarDivida(ctx context.Context, divida domain.Divida) (validacao []domain.ApiError, err error) {
+	validacao = validateDivida(divida)
+	if len(validacao) > 0 {
 		return
 	}
 
@@ -26,13 +22,9 @@ func BuscarDivida(ctx context.Context, id uint64) (domain.Divida, error) {
 	return mdldivida.FetchById(id)
 }
 
-func AtualizarDivida(ctx context.Context, idDivida uint64, dividaAtualizada domain.Divida) (validationErrors []domain.ApiError, err error) {
-	// Aqui você pode validar os dados antes de atualizar a dívida
-	if dividaAtualizada.Valor <= 0 {
-		validationErrors = append(validationErrors, domain.ApiError{
-			Status: 400,
-			Detail: "O valor da dívida deve ser maior que zero.",
-		})
+func AtualizarDivida(ctx context.Context, idDivida uint64, dividaAtualizada domain.Divida) (validacao []domain.ApiError, err error) {
+	validacao = validateDivida(dividaAtualizada)
+	if len(validacao) > 0 {
 		return
 	}
 
@@ -42,4 +34,16 @@ func AtualizarDivida(ctx context.Context, idDivida uint64, dividaAtualizada doma
 
 func DeletarDivida(ctx context.Context, idDivida uint64) error {
 	return mdldivida.Delete(idDivida)
+}
+
+func validateDivida(divida domain.Divida) (validacao []domain.ApiError) {
+	if divida.Valor <= 0 {
+		validacao = append(validacao, domain.ApiError{
+			Detail: "O valor da dívida deve ser maior que zero.",
+			Status: http.StatusBadRequest,
+		})
+		return
+	}
+
+	return
 }

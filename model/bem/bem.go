@@ -21,3 +21,8 @@ func Delete(id uint64) error {
 	r := Repository()
 	return r.delete(id)
 }
+
+func FetchByIdProprietario(IdProprietario uint64) ([]domain.Bem, error) {
+	r := Repository()
+	return r.fetchByIdProprietario(IdProprietario)
+}

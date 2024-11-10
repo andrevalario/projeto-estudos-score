@@ -1,4 +1,5 @@
-[
+{
+  "bens": [
     {
       "id": 1,
       "nome": "Carro",
@@ -18,4 +19,5 @@
       "proprietarioId": 3
     }
   ]
+}
   

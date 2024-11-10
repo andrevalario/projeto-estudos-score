@@ -6,3 +6,7 @@ type Bem struct {
 	Valor          float64 `json:"valor"`
 	IdProprietario uint64  `json:"proprietarioId"`
 }
+
+type BemResponse struct {
+	Bem []Bem `json:"bens"`
+}

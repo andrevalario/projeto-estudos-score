@@ -24,3 +24,9 @@ func Delete(idUsuario uint64) error {
 	r := Repository()
 	return r.delete(idUsuario)
 }
+
+// Função para buscar um usuário por um Email
+func FetchByEmail(emailUsuario string) (domain.Usuario, error) {
+	r := Repository()
+	return r.fetchByEmail(emailUsuario)
+}

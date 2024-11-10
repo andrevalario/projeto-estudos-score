@@ -2,17 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/andrevalario/projeto-estudos-score/domain"
 	ucsbem "github.com/andrevalario/projeto-estudos-score/usecases/bem"
 	"github.com/andrevalario/projeto-estudos-score/utils"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
-func CriarBem(w http.ResponseWriter, r *http.Request) {
+func CriarBem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var novoBem domain.Bem
 	if err := json.NewDecoder(r.Body).Decode(&novoBem); err != nil {
 		utils.ErrorResponseJson(r.Context(), w, err)
@@ -28,10 +27,10 @@ func CriarBem(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, "Bem criado com sucesso", http.StatusOK)
 }
 
-func BuscarBemPorID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+func BuscarBemPorID(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id, err := strconv.ParseUint(p.ByName("id"), 10, 64)
 	if err != nil {
-		utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("ID inválido: %v", err))
+		utils.ErrorResponseJson(r.Context(), w, err)
 		return
 	}
 
@@ -44,7 +43,7 @@ func BuscarBemPorID(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, bem, http.StatusOK)
 }
 
-func AtualizarBem(w http.ResponseWriter, r *http.Request) {
+func AtualizarBem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var bemAtualizado domain.Bem
 	if err := json.NewDecoder(r.Body).Decode(&bemAtualizado); err != nil {
 		utils.ErrorResponseJson(r.Context(), w, err)
@@ -60,10 +59,10 @@ func AtualizarBem(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, "Bem atualizado com sucesso", http.StatusOK)
 }
 
-func DeletarBem(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+func DeletarBem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id, err := strconv.ParseUint(p.ByName("id"), 10, 64)
 	if err != nil {
-		utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("ID inválido: %v", err))
+		utils.ErrorResponseJson(r.Context(), w, err)
 		return
 	}
 

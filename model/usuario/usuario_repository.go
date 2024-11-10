@@ -36,9 +36,9 @@ func (repo *UsuarioRepository) carregarUltimoID() {
 	}
 
 	// Se houver usuários, o último ID será o maior ID existente
-	for _, u := range usuarios {
-		if u.Id > repo.ultimoID {
-			repo.ultimoID = u.Id
+	for _, usuario := range usuarios {
+		if usuario.Id > repo.ultimoID {
+			repo.ultimoID = usuario.Id
 		}
 	}
 }
@@ -57,7 +57,7 @@ func (repo *UsuarioRepository) read() ([]domain.Usuario, error) {
 	dados, err := ioutil.ReadFile(repo.filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return []domain.Usuario{}, nil // Se o arquivo não existe, retorna uma lista vazia
+			return []domain.Usuario{}, nil
 		}
 		return nil, err
 	}
@@ -101,9 +101,9 @@ func (repo *UsuarioRepository) fetchById(idUsuario uint64) (domain.Usuario, erro
 		return domain.Usuario{}, err
 	}
 
-	for _, u := range usuarios {
-		if u.Id == idUsuario {
-			return u, nil
+	for _, usuario := range usuarios {
+		if usuario.Id == idUsuario {
+			return usuario, nil
 		}
 	}
 	return domain.Usuario{}, errors.New("usuário não encontrado")
@@ -116,8 +116,8 @@ func (repo *UsuarioRepository) update(usuarioAtualizado domain.Usuario) error {
 		return err
 	}
 
-	for i, u := range usuarios {
-		if u.Id == usuarioAtualizado.Id {
+	for i, usuario := range usuarios {
+		if usuario.Id == usuarioAtualizado.Id {
 			usuarios[i] = usuarioAtualizado
 			return repo.save(usuarios)
 		}
@@ -133,12 +133,27 @@ func (repo *UsuarioRepository) delete(idUsuario uint64) error {
 		return err
 	}
 
-	for i, u := range usuarios {
-		if u.Id == idUsuario {
+	for i, usuario := range usuarios {
+		if usuario.Id == idUsuario {
 			usuarios = append(usuarios[:i], usuarios[i+1:]...)
 			return repo.save(usuarios)
 		}
 	}
 
 	return errors.New("usuário informado não encontrado")
+}
+
+// Função para buscar um usuário por Email
+func (repo *UsuarioRepository) fetchByEmail(emailUsuario string) (domain.Usuario, error) {
+	usuarios, err := repo.read()
+	if err != nil {
+		return domain.Usuario{}, err
+	}
+
+	for _, usuario := range usuarios {
+		if usuario.Email == emailUsuario {
+			return usuario, nil
+		}
+	}
+	return domain.Usuario{}, errors.New("usuário não encontrado")
 }

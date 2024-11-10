@@ -1,57 +1,128 @@
-package middleware
+package mdlmiddleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/andrevalario/projeto-estudos-score/domain"
+	mdlusuario "github.com/andrevalario/projeto-estudos-score/model/usuario"
+	"github.com/andrevalario/projeto-estudos-score/utils"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/julienschmidt/httprouter"
 )
 
-// ValidarTokenEPermissoes - Função que valida o token e verifica permissões do usuário
-func ValidarTokenEPermissoes(r *http.Request, requiredPermission uint64) (domain.Usuario, error) {
-	// Obter o token do header Authorization
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		return domain.Usuario{}, fmt.Errorf("Token não encontrado")
-	}
-
-	// Remover o prefixo "Bearer "
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
-	// Validar e decodificar o token JWT
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Validar o método de assinatura
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Método de assinatura inválido")
+// Função para validar o token JWT e verificar permissões e existência do usuário
+func ValidarToken(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		tokenString := r.Header.Get("Authorization")
+		if tokenString == "" {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("token não encontrado"))
+			return
 		}
-		// Retornar a chave secreta para validação
-		return []byte("minha-chave-secreta"), nil
-	})
 
-	// Se o token for inválido ou ocorrer algum erro
-	if err != nil || !token.Valid {
-		return domain.Usuario{}, fmt.Errorf("Token inválido")
+		token, err := jwt.Parse(strings.TrimPrefix(tokenString, "Bearer "), func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("método de assinatura inválido")
+			}
+			return []byte(os.Getenv("JWT_TOKEN")), nil
+		})
+
+		if err != nil || !token.Valid {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("token inválido"))
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("erro ao ler as claims do token"))
+			return
+		}
+
+		idUsuarioClaims, ok := claims["id"].(float64)
+		if !ok {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("ID inválido"))
+			return
+		}
+
+		idUsuario := uint64(idUsuarioClaims)
+		usuario, err := mdlusuario.FetchById(idUsuario)
+		if err != nil {
+			return
+		}
+
+		if usuario.Id == 0 {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("usuário não encontrado"))
+		}
+
+		ctx := context.WithValue(r.Context(), domain.UsuarioAutenticado, &usuario)
+		r = r.WithContext(ctx)
+
+		h(w, r, ps)
+	}
+}
+
+func ValidarAcessoDivida(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		usuario, existe := r.Context().Value(domain.UsuarioAutenticado).(*domain.Usuario)
+		if !existe {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("usuário não encontrado no contexto"))
+			return
+		}
+
+		if usuario.TipoUsuario != domain.Admin {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("acesso não permitido para este tipo de usuário"))
+		}
+
+		h(w, r, ps)
+	}
+}
+
+func ValidarAcessoBens(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		usuario, existe := r.Context().Value(domain.UsuarioAutenticado).(*domain.Usuario)
+		if !existe {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("usuário não encontrado no contexto"))
+			return
+		}
+
+		// Usuário admin tem acesos total
+		if usuario.TipoUsuario == domain.Admin {
+			return
+		}
+
+		//Validacao de pertencimento do dado levado para o usecase para não duplicar chamadas ao banco de dados.
+
+		h(w, r, ps)
+	}
+}
+
+func GetUsuarioAutenticado(ctx context.Context) (domain.Usuario, error) {
+	usuarioAutenticado, existe := ctx.Value(domain.UsuarioAutenticado).(*domain.Usuario)
+
+	fmt.Println("usuario", usuarioAutenticado)
+	if !existe {
+		fmt.Println("to caindo aqui")
+		return domain.Usuario{}, fmt.Errorf("usuário aiutenticado não encontrado")
 	}
 
-	// Obter as claims do token
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return domain.Usuario{}, fmt.Errorf("Erro ao ler as claims do token")
-	}
+	return *usuarioAutenticado, nil
+}
 
-	// Criar o usuário a partir das claims
-	user := domain.Usuario{
-		Id:          uint64(claims["id"].(float64)),
-		Nome:        claims["nome"].(string),
-		TipoUsuario: uint64(claims["tipoUsuario"].(float64)),
-	}
+func ValidarAcessoAdmin(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		usuario, existe := r.Context().Value(domain.UsuarioAutenticado).(*domain.Usuario)
+		if !existe {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("usuário não encontrado no contexto"))
+			return
+		}
 
-	// Verificar se o usuário tem a permissão necessária
-	if user.TipoUsuario != requiredPermission {
-		return domain.Usuario{}, fmt.Errorf("Permissão insuficiente")
-	}
+		if usuario.TipoUsuario != domain.Admin {
+			utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("acesso não permitido para este tipo de usuário"))
+		}
 
-	return user, nil
+		h(w, r, ps)
+	}
 }

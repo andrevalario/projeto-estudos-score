@@ -2,24 +2,17 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/andrevalario/projeto-estudos-score/domain"
-	"github.com/andrevalario/projeto-estudos-score/middleware"
 	ucsdivida "github.com/andrevalario/projeto-estudos-score/usecases/divida"
 	"github.com/andrevalario/projeto-estudos-score/utils"
 	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
-func CriarDivida(w http.ResponseWriter, r *http.Request) {
-	_, err := middleware.ValidarTokenEPermissoes(r, 1) // 1 para admin
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
+func CriarDivida(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var novaDivida domain.Divida
 	if err := json.NewDecoder(r.Body).Decode(&novaDivida); err != nil {
 		utils.ErrorResponseJson(r.Context(), w, err)
@@ -40,16 +33,10 @@ func CriarDivida(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, "Dívida criada com sucesso", http.StatusOK)
 }
 
-func BuscarDivida(w http.ResponseWriter, r *http.Request) {
-	_, err := middleware.ValidarTokenEPermissoes(r, 1) // 1 para admin
+func BuscarDivida(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id, err := strconv.ParseUint(p.ByName("id"), 10, 64)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
-	if err != nil {
-		utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("ID inválido: %v", err))
+		utils.ErrorResponseJson(r.Context(), w, err)
 		return
 	}
 
@@ -62,13 +49,7 @@ func BuscarDivida(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, divida, http.StatusOK)
 }
 
-func AtualizarDivida(w http.ResponseWriter, r *http.Request) {
-	_, err := middleware.ValidarTokenEPermissoes(r, 1) // 1 para admin
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
+func AtualizarDivida(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var dividaAtualizada domain.Divida
 	if err := json.NewDecoder(r.Body).Decode(&dividaAtualizada); err != nil {
 		utils.ErrorResponseJson(r.Context(), w, err)
@@ -77,7 +58,7 @@ func AtualizarDivida(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("ID inválido: %v", err))
+		utils.ErrorResponseJson(r.Context(), w, err)
 		return
 	}
 
@@ -95,16 +76,10 @@ func AtualizarDivida(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, "Dívida atualizada com sucesso", http.StatusOK)
 }
 
-func DeletarDivida(w http.ResponseWriter, r *http.Request) {
-	_, err := middleware.ValidarTokenEPermissoes(r, 1) // 1 para admin
+func DeletarDivida(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id, err := strconv.ParseUint(p.ByName("id"), 10, 64)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
-	if err != nil {
-		utils.ErrorResponseJson(r.Context(), w, fmt.Errorf("ID inválido: %v", err))
+		utils.ErrorResponseJson(r.Context(), w, err)
 		return
 	}
 

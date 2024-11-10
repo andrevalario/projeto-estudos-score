@@ -54,12 +54,12 @@ func (repo *BemRepository) read() ([]domain.Bem, error) {
 		return nil, err
 	}
 
-	var bens []domain.Bem
+	var bens domain.BemResponse
 	if err := json.Unmarshal(data, &bens); err != nil {
 		return nil, err
 	}
 
-	return bens, nil
+	return bens.Bem, nil
 }
 
 func (repo *BemRepository) save(bens []domain.Bem) error {
@@ -123,4 +123,19 @@ func (repo *BemRepository) delete(id uint64) error {
 		}
 	}
 	return errors.New("Bem não encontrado para deleção")
+}
+
+func (repo *BemRepository) fetchByIdProprietario(IdProprietario uint64) (bens []domain.Bem, err error) {
+	bens, err = repo.read()
+	if err != nil {
+		return []domain.Bem{}, err
+	}
+
+	for _, bem := range bens {
+		if bem.IdProprietario == IdProprietario {
+			bens = append(bens, bem)
+		}
+	}
+
+	return
 }

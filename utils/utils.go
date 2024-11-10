@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"runtime"
 
 	"github.com/andrevalario/projeto-estudos-score/domain"
 )
@@ -115,4 +116,37 @@ func formatErrResponse(err error) (res JsonResponse, status int) {
 	return NewJsonResponse(nil, errors, MetaResponse{
 		Count: len(errors),
 	}), status
+}
+
+func NewApiError(err domain.ApiError, cfg ...domain.ErrorConfig) *domain.ApiError {
+	config := domain.ErrorConfig{
+		SkipCaller: 1,
+	}
+
+	if len(cfg) > 0 {
+		config = cfg[0]
+	}
+
+	pc, file, line, _ := runtime.Caller(config.SkipCaller)
+	funct := runtime.FuncForPC(pc)
+	funcName := funct.Name()
+
+	if err.Debug == nil {
+		err.Debug = &domain.Debug{
+			File:      file,
+			Line:      line,
+			RootCause: funcName,
+			Stack:     domain.ApiStack{},
+		}
+	}
+
+	if config.Wrap {
+		if config.WrapMsg == "" {
+			config.WrapMsg = fmt.Sprintf("%v:%v", funcName, line)
+		}
+
+		err.Debug.Stack = domain.ApiStack{}
+	}
+
+	return &err
 }

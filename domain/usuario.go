@@ -1,5 +1,11 @@
 package domain
 
+type KeyAutenticacao string
+
+const (
+	UsuarioAutenticado KeyAutenticacao = "usuarioautenticado"
+)
+
 type Usuario struct {
 	Id          uint64 `json:"id"`
 	Nome        string `json:"nome"`
@@ -12,6 +18,6 @@ type UsuarioResponse struct {
 	Usuarios []Usuario `json:"usuarios"`
 }
 type LoginRequest struct {
-	ID    uint64 `json:"id"`
+	Email string `json:"email"`
 	Senha string `json:"senha"`
 }

@@ -31,9 +31,9 @@ func (repo *DividaRepository) carregarUltimoID() {
 		return
 	}
 
-	for _, d := range dividas {
-		if d.Id > repo.ultimoID {
-			repo.ultimoID = d.Id
+	for _, divida := range dividas {
+		if divida.Id > repo.ultimoID {
+			repo.ultimoID = divida.Id
 		}
 	}
 }
@@ -54,12 +54,12 @@ func (repo *DividaRepository) read() ([]domain.Divida, error) {
 		return nil, err
 	}
 
-	var dividas []domain.Divida
+	var dividas domain.DividaResponse
 	if err := json.Unmarshal(data, &dividas); err != nil {
 		return nil, err
 	}
 
-	return dividas, nil
+	return dividas.Dividas, nil
 }
 
 func (repo *DividaRepository) save(dividas []domain.Divida) error {
@@ -87,11 +87,12 @@ func (repo *DividaRepository) fetchById(id uint64) (domain.Divida, error) {
 		return domain.Divida{}, err
 	}
 
-	for _, d := range dividas {
-		if d.Id == id {
-			return d, nil
+	for _, divida := range dividas {
+		if divida.Id == id {
+			return divida, nil
 		}
 	}
+
 	return domain.Divida{}, errors.New("dívida não encontrada")
 }
 
@@ -101,8 +102,8 @@ func (repo *DividaRepository) update(id uint64, dividaAtualizada domain.Divida) 
 		return err
 	}
 
-	for i, d := range dividas {
-		if d.Id == id {
+	for i, divida := range dividas {
+		if divida.Id == id {
 			dividas[i] = dividaAtualizada
 			return repo.save(dividas)
 		}
@@ -116,11 +117,26 @@ func (repo *DividaRepository) delete(id uint64) error {
 		return err
 	}
 
-	for i, d := range dividas {
-		if d.Id == id {
+	for i, divida := range dividas {
+		if divida.Id == id {
 			dividas = append(dividas[:i], dividas[i+1:]...)
 			return repo.save(dividas)
 		}
 	}
 	return errors.New("dívida não encontrada")
+}
+
+func (repo *DividaRepository) fetchByIdUsuario(idUsuario uint64) (dividas []domain.Divida, err error) {
+	dividas, err = repo.read()
+	if err != nil {
+		return []domain.Divida{}, err
+	}
+
+	for _, divida := range dividas {
+		if divida.IdUsuario == idUsuario {
+			dividas = append(dividas, divida)
+		}
+	}
+
+	return
 }

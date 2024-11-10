@@ -5,14 +5,17 @@ import (
 	"net/http"
 
 	"github.com/andrevalario/projeto-estudos-score/handlers"
-	"github.com/gorilla/mux"
+	mdlmiddleware "github.com/andrevalario/projeto-estudos-score/middleware"
+	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 // Função responsável por iniciar o servidor
 func LoadServer() {
 	// Carrega o roteador e inicia o servidor
 	router := LoadRouter()
-	apiPort := ":8080"
+	apiPort := ":8081"
 	fmt.Printf("Iniciando servidor na porta %s\n", apiPort)
 
 	// Usa o router carregado pelo LoadRouter
@@ -23,43 +26,58 @@ func LoadServer() {
 }
 
 // Função que carrega as rotas
-func LoadRouter() *mux.Router {
+func LoadRouter() http.Handler {
 	// Configura o router e as rotas
-	router := mux.NewRouter()
+	router := httptrace.New(
+		httptrace.WithServiceName("projeto-estudo-score"),
+		httptrace.WithSpanOptions(
+			tracer.Tag(ext.SamplingPriority, ext.PriorityUserKeep),
+		),
+	)
 
 	// Adiciona a rota de verificação de vida
-	router.HandleFunc("/alive", handlers.Alive).Methods("GET")
+	router.GET("/alive", handlers.Alive)
 
 	// Chama as funções de configuração das rotas
+	loadRouterAutenticacao(router)
 	loadRouterUsuario(router)
 	loadRouterDividas(router)
 	loadRouterBens(router)
+	loadRouterScore(router)
 
 	return router
 }
 
+// Função que configura as rotas relacionadas á autenticação
+func loadRouterAutenticacao(router *httptrace.Router) {
+	router.POST("/login", handlers.LoginUsuario)
+}
+
 // Função que configura as rotas relacionadas ao usuário
-func loadRouterUsuario(router *mux.Router) {
-	// Rotas para o CRUD de usuário
-	router.HandleFunc("/login", handlers.LoginUsuario).Methods("POST")
-	router.HandleFunc("/usuario", handlers.CriarUsuario).Methods("POST")
-	router.HandleFunc("/usuarios/{id}", handlers.BuscarUsuarioPorID).Methods("GET")
-	router.HandleFunc("/usuarios/{id}", handlers.AtualizarUsuario).Methods("PUT")
-	router.HandleFunc("/usuarios/{id}", handlers.DeletarUsuario).Methods("DELETE")
+func loadRouterUsuario(router *httptrace.Router) {
+	router.POST("/usuario", handlers.CriarUsuario)
+	router.GET("/usuarios/:id", handlers.BuscarUsuarioPorID)
+	router.PUT("/usuarios/:id", handlers.AtualizarUsuario)
+	router.DELETE("/usuarios/:id", handlers.DeletarUsuario)
 }
 
 // Função que configura as rotas relacionadas as dividas de um usuário
-func loadRouterDividas(router *mux.Router) {
-	router.HandleFunc("/dividas", handlers.CriarDivida).Methods("POST")
-	router.HandleFunc("/dividas/{id}", handlers.BuscarDivida).Methods("GET")
-	router.HandleFunc("/dividas/{id}", handlers.AtualizarDivida).Methods("PUT")
-	router.HandleFunc("/dividas/{id}", handlers.DeletarDivida).Methods("DELETE")
+func loadRouterDividas(router *httptrace.Router) {
+	router.POST("/dividas", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoDivida(handlers.CriarDivida)))
+	router.GET("/dividas/:id", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoDivida(handlers.BuscarDivida)))
+	router.PUT("/dividas/:id", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoDivida(handlers.AtualizarDivida)))
+	router.DELETE("/dividas/:id", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoDivida(handlers.DeletarDivida)))
 }
 
 // Função que configura as rotas relacionadas aos bens vinculados a um usuário
-func loadRouterBens(router *mux.Router) {
-	router.HandleFunc("/bens", handlers.CriarBem).Methods("POST")
-	router.HandleFunc("/bens/{id}", handlers.BuscarBemPorID).Methods("GET")
-	router.HandleFunc("/bens/{id}", handlers.AtualizarBem).Methods("PUT")
-	router.HandleFunc("/bens/{id}", handlers.DeletarBem).Methods("DELETE")
+func loadRouterBens(router *httptrace.Router) {
+	router.POST("/bens", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoBens(handlers.CriarBem)))
+	router.GET("/bens/:id", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoBens(handlers.BuscarBemPorID)))
+	router.PUT("/bens/:id", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoBens(handlers.AtualizarBem)))
+	router.DELETE("/bens/:id", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoBens(handlers.DeletarBem)))
+}
+
+func loadRouterScore(router *httptrace.Router) {
+	router.GET("/score/admin/:id_usuario", mdlmiddleware.ValidarToken(mdlmiddleware.ValidarAcessoAdmin(handlers.CalcularScoreAdmin)))
+	router.GET("/score", mdlmiddleware.ValidarToken(handlers.CalcularScoreUsuario))
 }

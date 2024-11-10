@@ -27,3 +27,9 @@ func Delete(idDivida uint64) error {
 	r := Repository()
 	return r.delete(idDivida)
 }
+
+// Funcao para buscar as dividas de um usuário
+func FetchByIdUsuario(idUsuario uint64) ([]domain.Divida, error) {
+	r := Repository()
+	return r.fetchByIdUsuario(idUsuario)
+}

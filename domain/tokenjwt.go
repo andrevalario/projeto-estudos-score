@@ -1,12 +1,13 @@
 package domain
 
 import (
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-var secretKey = []byte("teste")
+var secretKey = []byte(os.Getenv("JWT_TOKEN"))
 
 // Estrutura do token
 type Claims struct {
