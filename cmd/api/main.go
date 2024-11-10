@@ -12,7 +12,6 @@ func main() {
 }
 
 func startApp() {
-	// Inicia servidor
 	loadEnv()
 	router.LoadServer()
 

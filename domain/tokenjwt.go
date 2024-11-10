@@ -9,7 +9,6 @@ import (
 
 var secretKey = []byte(os.Getenv("JWT_TOKEN"))
 
-// Estrutura do token
 type Claims struct {
 	ID         uint64   `json:"id"`
 	Nome       string   `json:"nome"`

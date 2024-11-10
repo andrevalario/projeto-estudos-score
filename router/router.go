@@ -13,7 +13,6 @@ import (
 
 // Função responsável por iniciar o servidor
 func LoadServer() {
-	// Carrega o roteador e inicia o servidor
 	router := LoadRouter()
 	apiPort := ":8081"
 	fmt.Printf("Iniciando servidor na porta %s\n", apiPort)

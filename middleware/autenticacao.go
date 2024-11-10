@@ -14,7 +14,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// Função para validar o token JWT e verificar permissões e existência do usuário
+// Função para validar o token JWT
 func ValidarToken(h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		tokenString := r.Header.Get("Authorization")
@@ -101,8 +101,6 @@ func ValidarAcessoBens(h httprouter.Handle) httprouter.Handle {
 
 func GetUsuarioAutenticado(ctx context.Context) (domain.Usuario, error) {
 	usuarioAutenticado, existe := ctx.Value(domain.UsuarioAutenticado).(*domain.Usuario)
-
-	fmt.Println("usuario", usuarioAutenticado)
 	if !existe {
 		fmt.Println("to caindo aqui")
 		return domain.Usuario{}, fmt.Errorf("usuário aiutenticado não encontrado")
