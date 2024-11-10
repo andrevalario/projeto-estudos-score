@@ -73,6 +73,15 @@ Optado por um banco em memória e uma estrutura JSON devido à simplicidade do p
 # Testando a API
 Para testar a API, você pode usar ferramentas como Postman ou cURL.
 
+```
+Para realizar o login e gerar o token JWT necessário para outras rotinas:
+Método: GET
+URL: http://localhost:8081/login
+Body: '{
+  "email":"teste@teste.com",
+  "senha": "senha123"
+}'
+```
 
 ```
 Para consultar o score do usuário autenticado (seu próprio score):
