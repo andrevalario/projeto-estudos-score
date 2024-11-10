@@ -1,5 +1,5 @@
 # Projeto de Sistema de Crédito
-Bem-vindo ao projeto de Sistema de Crédito! Este repositório contém a implementação de um sistema simples que calcula o score de crédito de um usuário com base em dois fatores principais: bens (imóveis, veículos) e dívidas. A API oferece funcionalidades tanto para usuários comuns quanto para administradores, que podem consultar o score de crédito de outros usuários.
+Este repositório contém a implementação de um sistema simples que calcula o score de crédito de um usuário com base em dois fatores principais: bens (imóveis, veículos) e dívidas. A API oferece funcionalidades tanto para usuários comuns quanto para administradores, que podem consultar o score de crédito de outros usuários.
 
 # Visão Geral do Projeto
 Este sistema possui algumas funcionalidades principais:

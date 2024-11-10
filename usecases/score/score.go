@@ -32,12 +32,12 @@ func CalcularScoreAdmin(ctx context.Context, idUsuario uint64) (score int, err e
 		return
 	}
 
-	score = calcularScoreCredito(bens, dividas)
+	score = CalcularScoreCredito(bens, dividas)
 
 	return
 }
 
-func calcularScoreCredito(bens []domain.Bem, dividas []domain.Divida) (score int) {
+func CalcularScoreCredito(bens []domain.Bem, dividas []domain.Divida) (score int) {
 	score = 1000
 
 	quantidadeDeBens := len(bens)
@@ -78,7 +78,7 @@ func CalcularScoreUsuario(ctx context.Context) (score int, err error) {
 		return
 	}
 
-	score = calcularScoreCredito(bens, dividas)
+	score = CalcularScoreCredito(bens, dividas)
 
 	return
 }
