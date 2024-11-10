@@ -10,7 +10,7 @@ import (
 )
 
 func CalcularScoreAdmin(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	idUsuario, err := strconv.ParseUint(p.ByName("id"), 10, 64)
+	idUsuario, err := strconv.ParseUint(p.ByName("id_usuario"), 10, 64)
 	if err != nil {
 		utils.ErrorResponseJson(r.Context(), w, err)
 		return
