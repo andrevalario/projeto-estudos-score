@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,6 +13,8 @@ import (
 )
 
 func CriarBem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fmt.Println("to aqui")
+
 	var novoBem domain.Bem
 	if err := json.NewDecoder(r.Body).Decode(&novoBem); err != nil {
 		utils.ErrorResponseJson(r.Context(), w, err)

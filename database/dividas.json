@@ -1,20 +1,29 @@
 {
-    "dividas": [
-      {
-        "id": 1,
-        "id_usuario": 1,
-        "valor": 500.00
-      },
-      {
-        "id": 2,
-        "id_usuario": 2,
-        "valor": 2000.00
-      },
-      {
-        "id": 3,
-        "id_usuario": 3,
-        "valor": 1200.50
-      }
-    ]
-  }
-  
+  "dividas": [
+    {
+      "id": 1,
+      "id_usuario": 1,
+      "valor": 500
+    },
+    {
+      "id": 2,
+      "id_usuario": 2,
+      "valor": 2000
+    },
+    {
+      "id": 3,
+      "id_usuario": 3,
+      "valor": 1200.5
+    },
+    {
+      "id": 4,
+      "id_usuario": 3,
+      "valor": 10
+    },
+    {
+      "id": 5,
+      "id_usuario": 3,
+      "valor": 20
+    }
+  ]
+}

@@ -90,6 +90,7 @@ func ValidarAcessoBens(h httprouter.Handle) httprouter.Handle {
 
 		// Usuário admin tem acesos total
 		if usuario.TipoUsuario == domain.Admin {
+			h(w, r, ps)
 			return
 		}
 

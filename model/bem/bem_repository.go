@@ -63,7 +63,11 @@ func (repo *BemRepository) read() ([]domain.Bem, error) {
 }
 
 func (repo *BemRepository) save(bens []domain.Bem) error {
-	data, err := json.MarshalIndent(bens, "", "  ")
+	bemResponse := domain.BemResponse{
+		Bem: bens,
+	}
+
+	data, err := json.MarshalIndent(bemResponse, "", "  ")
 	if err != nil {
 		return err
 	}

@@ -72,7 +72,11 @@ func (repo *UsuarioRepository) read() ([]domain.Usuario, error) {
 
 // Função para salvar a lista de usuários no "banco de dados"
 func (repo *UsuarioRepository) save(usuarios []domain.Usuario) error {
-	dados, err := json.MarshalIndent(usuarios, "", "  ")
+	usuarioResponse := domain.UsuarioResponse{
+		Usuarios: usuarios,
+	}
+
+	dados, err := json.MarshalIndent(usuarioResponse, "", "  ")
 	if err != nil {
 		return err
 	}

@@ -63,10 +63,15 @@ func (repo *DividaRepository) read() ([]domain.Divida, error) {
 }
 
 func (repo *DividaRepository) save(dividas []domain.Divida) error {
-	data, err := json.MarshalIndent(dividas, "", "  ")
+	dividaResponse := domain.DividaResponse{
+		Dividas: dividas,
+	}
+
+	data, err := json.MarshalIndent(dividaResponse, "", "  ")
 	if err != nil {
 		return err
 	}
+
 	return ioutil.WriteFile(repo.filePath, data, 0644)
 }
 
